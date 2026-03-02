@@ -1,9 +1,10 @@
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
 from django.core.exceptions import PermissionDenied
-from .models import Event
-from .serializers import EventSerializer
-from .permissions import IsClientCoachOrAdmin
+from .models import Event, Category
+from .serializers import EventSerializer, CategorySerializer
+from .permissions import IsClientCoachOrAdmin, IsAdminWriteReadAll
+
 
 class EventViewSet(ModelViewSet):
     serializer_class = EventSerializer
@@ -12,7 +13,7 @@ class EventViewSet(ModelViewSet):
     def get_queryset(self):
         user = self.request.user
 
-        if user.groups.filter(name="Admin").exists():
+        if user.is_superuser or user.groups.filter(name="Admin").exists():
             return Event.objects.all()
 
         if user.groups.filter(name="Client").exists():
@@ -22,11 +23,11 @@ class EventViewSet(ModelViewSet):
             return Event.objects.filter(client__coach__user=user)
 
         return Event.objects.none()
-    
+
     def perform_create(self, serializer):
         user = self.request.user
 
-        if user.groups.filter(name="Admin").exists():
+        if user.is_superuser or user.groups.filter(name="Admin").exists():
             serializer.save()
             return
 
@@ -41,4 +42,10 @@ class EventViewSet(ModelViewSet):
             serializer.save()
             return
 
-        raise PermissionDenied("Invalid role.")
+        raise PermissionDenied("Invalid role. Use Admin/Coach/Client group or superuser.")
+
+
+class CategoryViewSet(ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [IsAdminWriteReadAll]

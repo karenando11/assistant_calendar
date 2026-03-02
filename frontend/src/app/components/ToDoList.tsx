@@ -6,9 +6,10 @@ interface ToDoListProps {
   events: CalendarEvent[];
   categories: Category[];
   clients: Client[];
+  onEventClick?: (event: CalendarEvent) => void;
 }
 
-export function ToDoList({ events, categories, clients }: ToDoListProps) {
+export function ToDoList({ events, categories, clients, onEventClick }: ToDoListProps) {
   const sortedEvents = [...events].sort(
     (a, b) => a.date.getTime() - b.date.getTime()
   );
@@ -20,8 +21,9 @@ export function ToDoList({ events, categories, clients }: ToDoListProps) {
     clients.find((c) => c.id === clientId);
 
   const formatDate = (date: Date) => {
-    const today = new Date(2026, 1, 14);
-    const tomorrow = new Date(2026, 1, 15);
+    const today = new Date();
+    const tomorrow = new Date();
+    tomorrow.setDate(today.getDate() + 1);
 
     if (date.toDateString() === today.toDateString()) {
       return 'Today';
@@ -37,7 +39,7 @@ export function ToDoList({ events, categories, clients }: ToDoListProps) {
   };
 
   // Group events by status (overdue, today, upcoming)
-  const today = new Date(2026, 1, 14);
+  const today = new Date();
   today.setHours(0, 0, 0, 0);
   
   const overdueEvents = sortedEvents.filter(event => {
@@ -60,6 +62,7 @@ export function ToDoList({ events, categories, clients }: ToDoListProps) {
       <div
         key={event.id}
         className="todo-item"
+        onClick={() => onEventClick?.(event)}
         style={{   backgroundColor: category?.color ? `${category.color}60` : '#ffffff' }}
       >
         <input type="checkbox" className="todo-item__checkbox" />
@@ -111,3 +114,5 @@ export function ToDoList({ events, categories, clients }: ToDoListProps) {
     </div>
   );
 }
+
+

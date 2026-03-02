@@ -11,6 +11,7 @@ export interface CalendarEvent {
   categoryId: string;
   date: Date;
   time: string;
+  endTime?: string;
   duration: number;
   notes?: string;
 }

@@ -45,7 +45,7 @@ class CustomUserAdmin(DjangoUserAdmin):
     add_fieldsets = (
         (None, {
             "classes": ("wide",),
-            "fields": ("username", "email", "password", "role"),
+            "fields": ("username", "email", "password", "role", "coach_name"),
         }),
     )
 

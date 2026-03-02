@@ -7,10 +7,11 @@ interface CalendarViewProps {
   events: CalendarEvent[];
   categories: Category[];
   clients: Client[];
+  onEventClick?: (event: CalendarEvent) => void;
 }
 
-export function CalendarView({ events, categories, clients }: CalendarViewProps) {
-  const [currentDate, setCurrentDate] = useState(new Date(2026, 1, 14));
+export function CalendarView({ events, categories, clients, onEventClick}: CalendarViewProps) {
+  const [currentDate, setCurrentDate] = useState(new Date());
 
   const getCategory = (categoryId: string) =>
     categories.find((c) => c.id === categoryId);
@@ -56,7 +57,7 @@ export function CalendarView({ events, categories, clients }: CalendarViewProps)
   };
 
   const isToday = (day: number) => {
-    const today = new Date(2026, 1, 14);
+    const today = new Date();
     return (
       today.getFullYear() === currentDate.getFullYear() &&
       today.getMonth() === currentDate.getMonth() &&
@@ -79,19 +80,32 @@ export function CalendarView({ events, categories, clients }: CalendarViewProps)
         className={`calendar__day ${today ? 'calendar__day--today' : ''}`}
       >
         <div className="calendar__day-number">{day}</div>
-        <div className="calendar__day-events">
+        <div className="calendar__day-events" >
           {dayEvents.map((event) => {
             const category = getCategory(event.categoryId);
             const client = getClient(event.clientId);
+            
             return (
+              // <div
+              //   key={event.id}
+              //   className="calendar__event"
+              //   style={{ backgroundColor: category?.color }}
+              //   onClick={() => onEventClick?.(event)}
+              // >
+              //   <span className="calendar__event-title">{event.title}</span>
+              //   <span className="calendar__event-time">{event.time}</span>
+              //   <span className="calendar__event-client">{client?.name}</span>
+              // </div>
               <div
                 key={event.id}
                 className="calendar__event"
                 style={{ backgroundColor: category?.color }}
+                onClick={() => onEventClick?.(event)}
               >
-                <span className="calendar__event-title">{event.title}</span>
-                <span className="calendar__event-time">{event.time}</span>
-                <span className="calendar__event-client">{client?.name}</span>
+                <span className="calendar__event-dot" />
+                <span className="calendar__event-text">
+                  [{client?.name || 'No Client'}] {event.time || ''} {event.title}
+                </span>
               </div>
             );
           })}
@@ -144,3 +158,4 @@ export function CalendarView({ events, categories, clients }: CalendarViewProps)
     </div>
   );
 }
+

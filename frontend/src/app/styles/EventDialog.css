@@ -1,0 +1,149 @@
+.event-dialog-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: none;
+  border-radius: 0.6rem;
+  background: #050b20;
+  color: #f8fafc;
+  padding: 0.6rem 0.95rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.event-dialog-trigger:hover {
+  background: #0b1538;
+}
+
+.event-dialog-trigger__plus {
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.event-dialog {
+  width: min(620px, calc(100vw - 2rem));
+  max-height: calc(100dvh - 2rem);
+  overflow: auto;
+  border-radius: 0.7rem;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  padding: 1.5rem;
+}
+
+.event-dialog__header {
+  margin-bottom: 0.5rem;
+}
+
+.event-dialog__title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.event-dialog__subtitle {
+  font-size: 1rem;
+  color: #6b7280;
+}
+
+.event-dialog__form {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.event-dialog__field {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.event-dialog__label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.event-dialog__input,
+.event-dialog__textarea,
+.event-dialog__select-trigger {
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.55rem;
+  box-shadow: none;
+}
+
+.event-dialog__input {
+  height: 2.6rem;
+}
+
+.event-dialog__input:focus,
+.event-dialog__textarea:focus,
+.event-dialog__select-trigger:focus {
+  border-color: #9ca3af;
+}
+
+.event-dialog__textarea {
+  min-height: 4rem;
+}
+
+.event-dialog__hint {
+  font-size: 0.8rem;
+  color: #374151;
+  font-weight: 600;
+}
+
+.event-dialog__time-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.9rem;
+}
+
+.event-dialog__footer {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  flex-direction: row;
+}
+
+.event-dialog__cancel,
+.event-dialog__primary {
+  border-radius: 0.6rem;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.event-dialog__cancel {
+  background: #ffffff;
+  color: #111827;
+  border-color: #d1d5db;
+}
+
+.event-dialog__cancel:hover {
+  background: #f9fafb;
+}
+
+.event-dialog__primary {
+  background: #8f909b;
+  color: #ffffff;
+}
+
+.event-dialog__primary:hover {
+  background: #777986;
+}
+
+@media (max-width: 640px) {
+  .event-dialog {
+    padding: 1rem;
+  }
+
+  .event-dialog__title {
+    font-size: 1.6rem;
+  }
+
+  .event-dialog__time-row {
+    grid-template-columns: 1fr;
+  }
+}

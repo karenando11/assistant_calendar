@@ -1,0 +1,149 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@300&display=swap');
+
+.event-details-dialog {
+  width: min(640px, calc(100vw - 2rem));
+  max-height: calc(100dvh - 2rem);
+  overflow: auto;
+  border-radius: 0.7rem;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  padding: 1.5rem;
+}
+
+.event-details-dialog__header {
+  margin-bottom: 0.5rem;
+}
+
+.event-details-dialog__title {
+  font-family: Lato, sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.event-details-dialog__subtitle {
+  font-size: 1rem;
+  color: #6b7280;
+}
+
+.event-details-dialog__form {
+  display: grid;
+  gap: 0.95rem;
+}
+
+.event-details-dialog__field {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.event-details-dialog__label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.event-details-dialog__input,
+.event-details-dialog__textarea,
+.event-details-dialog__select-trigger {
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.55rem;
+  box-shadow: none;
+}
+
+.event-details-dialog__input {
+  height: 2.6rem;
+}
+
+.event-details-dialog__textarea {
+  min-height: 4rem;
+}
+
+.event-details-dialog__hint {
+  color: #6b7280;
+  font-size: 0.8rem;
+}
+
+.event-details-dialog__time-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.9rem;
+}
+
+.event-details-dialog__footer {
+  margin-top: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: row;
+}
+
+.event-details-dialog__actions-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.event-details-dialog__danger,
+.event-details-dialog__cancel,
+.event-details-dialog__primary {
+  border-radius: 0.6rem;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.event-details-dialog__danger {
+  background: #e11d48;
+  color: #ffffff;
+}
+
+.event-details-dialog__cancel {
+  background: #ffffff;
+  color: #111827;
+  border-color: #d1d5db;
+}
+
+.event-details-dialog__primary {
+  background: #050b20;
+  color: #ffffff;
+}
+
+.event-details-dialog__danger:hover {
+  background: #be123c;
+}
+
+.event-details-dialog__cancel:hover {
+  background: #f9fafb;
+}
+
+.event-details-dialog__primary:hover {
+  background: #0b1538;
+}
+
+@media (max-width: 640px) {
+  .event-details-dialog {
+    padding: 1rem;
+  }
+
+  .event-details-dialog__title {
+    font-size: 1.5rem;
+  }
+
+  .event-details-dialog__time-row {
+    grid-template-columns: 1fr;
+  }
+
+  .event-details-dialog__footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.6rem;
+  }
+
+  .event-details-dialog__actions-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+}

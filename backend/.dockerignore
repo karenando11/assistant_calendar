@@ -1,0 +1,13 @@
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+*.ctl
+*.pid
+*.sock
+db.sqlite3
+.git
+.gitignore
