@@ -63,9 +63,8 @@ export function ToDoList({ events, categories, clients, onEventClick }: ToDoList
         key={event.id}
         className="todo-item"
         onClick={() => onEventClick?.(event)}
-        style={{   backgroundColor: category?.color ? `${category.color}60` : '#ffffff' }}
+        style={{ backgroundColor: category?.color ? `${category.color}60` : '#ffffff' }}
       >
-        <input type="checkbox" className="todo-item__checkbox" />
         <div className="todo-item__content">
           <div className="todo-item__header">
             <h3 className="todo-item__title">{event.title}</h3>
@@ -114,5 +113,4 @@ export function ToDoList({ events, categories, clients, onEventClick }: ToDoList
     </div>
   );
 }
-
 
