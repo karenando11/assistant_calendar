@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.db import transaction
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
@@ -33,7 +34,21 @@ def serialize_user(user):
 class ClientViewSet(ReadOnlyModelViewSet):
     serializer_class = ClientSerializer
     permission_classes = [IsAuthenticated]
-    queryset = Client.objects.select_related("user", "coach", "coach__user").all()
+
+    def get_queryset(self):
+        base_qs = Client.objects.select_related("user", "coach", "coach__user")
+        viewer_role = (get_user_role(self.request.user) or "").lower()
+
+        if viewer_role == "admin":
+            return base_qs.all()
+
+        if viewer_role == "coach":
+            return base_qs.filter(coach__user=self.request.user)
+
+        if viewer_role == "client":
+            return base_qs.filter(user=self.request.user)
+
+        return base_qs.none()
 
 
 class UserListView(APIView):
@@ -66,10 +81,17 @@ class UserCreateView(APIView):
         responses={201: dict},
     )
     def post(self, request):
-        serializer = UserCreateSerializer(data=request.data)
+        is_bulk = isinstance(request.data, list)
+        serializer = UserCreateSerializer(data=request.data, many=is_bulk)
         serializer.is_valid(raise_exception=True)
-        user = serializer.save()
-        return Response(serialize_user(user), status=status.HTTP_201_CREATED)
+
+        with transaction.atomic():
+            created = serializer.save()
+
+        if is_bulk:
+            return Response([serialize_user(user) for user in created], status=status.HTTP_201_CREATED)
+
+        return Response(serialize_user(created), status=status.HTTP_201_CREATED)
 
 
 class UserUpdateView(APIView):
@@ -102,3 +124,4 @@ class UserUpdateView(APIView):
         serializer.is_valid(raise_exception=True)
         updated_user = serializer.save()
         return Response(serialize_user(updated_user), status=status.HTTP_200_OK)
+

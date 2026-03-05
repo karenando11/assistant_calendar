@@ -27,6 +27,8 @@ class ClientSerializer(serializers.ModelSerializer):
 
 class UserCreateSerializer(serializers.Serializer):
     username = serializers.CharField()
+    first_name = serializers.CharField(required=False, allow_blank=True)
+    last_name = serializers.CharField(required=False, allow_blank=True)
     email = serializers.EmailField(required=False, allow_blank=True)
     password = serializers.CharField(write_only=True, min_length=8)
     role = serializers.ChoiceField(choices=["admin", "coach", "client"])
@@ -107,3 +109,4 @@ class UserUpdateSerializer(serializers.Serializer):
             client.save()
 
         return instance
+
