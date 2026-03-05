@@ -8,9 +8,12 @@ import { EventDialog } from './components/EventDialog';
 import { EventDetailsDialog } from './components/EventDetailsDialog';
 import { LoginView } from './components/LoginView';
 import { LoggedOutView } from './components/LoggedOutView';
+import { AdminUsersPage } from './components/AdminUsersPage';
 import type { CalendarEvent, Category, Client } from './types/calendar';
 
 type View = 'todo' | 'calendar';
+type Page = 'main' | 'admin-users';
+type AuthRole = 'admin' | 'coach' | 'client' | null;
 
 type AuthPayload = {
   username: string;
@@ -18,9 +21,19 @@ type AuthPayload = {
   refresh: string;
 };
 
+const CATEGORY_FALLBACK_COLORS = ['#A8C5DA', '#B8E0D2', '#F9D8A5', '#F7B7C3', '#D5C6F7', '#BFE7E5', '#FFD8B5', '#E4C1F9'];
+
+const pickFallbackCategoryColor = (categoryId: string) => {
+  const chars = String(categoryId || '0').split('');
+  const hash = chars.reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+  return CATEGORY_FALLBACK_COLORS[hash % CATEGORY_FALLBACK_COLORS.length];
+};
+
+
 export default function App() {
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [mobileView, setMobileView] = useState<View>('calendar');
+  const [currentPage, setCurrentPage] = useState<Page>('main');
   const [eventsState, setEventsState] = useState<CalendarEvent[]>([]);
   const [authUser, setAuthUser] = useState<string | null>(() => {
     const token = localStorage.getItem('access_token');
@@ -29,6 +42,8 @@ export default function App() {
   });
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [sessionExpired, setSessionExpired] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [authRole, setAuthRole] = useState<AuthRole>(null);
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
@@ -41,6 +56,9 @@ export default function App() {
     setEventsState([]);
     setSelectedEvent(null);
     setSelectedClientId(null);
+    setIsAdmin(false);
+    setAuthRole(null);
+    setCurrentPage('main');
   };
 
   const handleAuthExpired = () => {
@@ -63,7 +81,7 @@ export default function App() {
       }
 
       try {
-        const [eventRes, categoryRes, clientRes] = await Promise.all([
+        const [eventRes, categoryRes, clientRes, userRes] = await Promise.all([
           fetch(`${apiBase}/api/event/`, {
             headers: {
               'Content-Type': 'application/json',
@@ -82,9 +100,15 @@ export default function App() {
               Authorization: `Bearer ${token}`,
             },
           }),
+          fetch(`${apiBase}/api/user/`, {
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          }),
         ]);
 
-        if ([eventRes, categoryRes, clientRes].some((res) => res.status === 401)) {
+        if ([eventRes, categoryRes, clientRes, userRes].some((res) => res.status === 401)) {
           handleAuthExpired();
           return;
         }
@@ -120,7 +144,7 @@ export default function App() {
             categoryItems.map((c: any) => ({
               id: String(c.id),
               name: c.name,
-              color: c.color ?? '#A8C5DA',
+              color: c.color || pickFallbackCategoryColor(String(c.id)),
             }))
           );
         }
@@ -139,6 +163,23 @@ export default function App() {
             }))
           );
         }
+
+        if (userRes.status === 403) {
+          setIsAdmin(false);
+          setAuthRole('client');
+          setCurrentPage('main');
+        } else if (!userRes.ok) {
+          setIsAdmin(false);
+          setAuthRole(null);
+        } else {
+          const userData = await userRes.json();
+          const userItems = Array.isArray(userData) ? userData : userData.results ?? [];
+          const me = userItems.find((u: any) => u.username === authUser);
+          const nextIsAdmin = me?.role === 'admin';
+          setIsAdmin(nextIsAdmin);
+          setAuthRole(nextIsAdmin ? 'admin' : 'coach');
+          if (!nextIsAdmin) setCurrentPage('main');
+        }
       } catch (error) {
         console.error('Failed to load app data:', error);
       }
@@ -146,7 +187,6 @@ export default function App() {
 
     fetchData();
   }, [authUser, apiBase]);
-
 
   const handleCreateEvent = async (data: {
     title: string;
@@ -288,6 +328,9 @@ export default function App() {
     localStorage.setItem('auth_username', payload.username);
     setAuthUser(payload.username);
     setSessionExpired(false);
+    setIsAdmin(false);
+    setAuthRole(null);
+    setCurrentPage('main');
   };
 
   const handleLogout = () => {
@@ -307,6 +350,16 @@ export default function App() {
     return <LoginView onLoginSuccess={handleLoginSuccess} />;
   }
 
+  if (currentPage === 'admin-users' && isAdmin) {
+    return (
+      <AdminUsersPage
+        apiBase={apiBase}
+        onAuthExpired={handleAuthExpired}
+        onBack={() => setCurrentPage('main')}
+      />
+    );
+  }
+
   const filteredEvents = selectedClientId
     ? eventsState.filter((event) => event.clientId === selectedClientId)
     : eventsState;
@@ -315,11 +368,13 @@ export default function App() {
     <div className="app">
       <div className="app__controls">
         <div className="app__top-row">
-          <ClientSelector
-            clients={clients}
-            selectedClientId={selectedClientId}
-            onClientChange={setSelectedClientId}
-          />
+          {authRole !== 'client' && (
+            <ClientSelector
+              clients={clients}
+              selectedClientId={selectedClientId}
+              onClientChange={setSelectedClientId}
+            />
+          )}
           <div className="app__actions">
             <EventDialog clients={clients} categories={categories} onCreate={handleCreateEvent} />
             <button className="app__logout" onClick={handleLogout}>
@@ -372,6 +427,14 @@ export default function App() {
         </div>
       </div>
 
+      {isAdmin && (
+        <div className="app__bottom-actions">
+          <button className="app__admin-page" type="button" onClick={() => setCurrentPage('admin-users')}>
+            Manage Users
+          </button>
+        </div>
+      )}
+
       <EventDetailsDialog
         open={!!selectedEvent}
         event={selectedEvent}
@@ -386,4 +449,6 @@ export default function App() {
     </div>
   );
 }
+
+
 

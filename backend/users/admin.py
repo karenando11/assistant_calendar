@@ -96,3 +96,5 @@ class CoachAdmin(admin.ModelAdmin):
 @admin.register(Client)
 class ClientAdmin(admin.ModelAdmin):
     list_display = ("id", "user", "coach")
+
+

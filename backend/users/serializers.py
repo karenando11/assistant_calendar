@@ -5,14 +5,30 @@ from .models import Client, Coach
 from .roles import apply_role, get_user_role
 
 
+class CoachSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source="user.username", read_only=True)
+    name = serializers.SerializerMethodField()
+    email = serializers.EmailField(source="user.email", read_only=True)
+    client_count = serializers.IntegerField(source="clients.count", read_only=True)
+
+    class Meta:
+        model = Coach
+        fields = ["id", "username", "name", "email", "client_count"]
+
+    def get_name(self, obj):
+        full_name = obj.user.get_full_name().strip()
+        return full_name or obj.user.username
+
+
 class ClientSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
     email = serializers.EmailField(source="user.email", read_only=True)
+    coach_id = serializers.IntegerField(source="coach.id", read_only=True)
     coach_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Client
-        fields = ["id", "name", "email", "coach_name"]
+        fields = ["id", "name", "email", "coach_id", "coach_name"]
 
     def get_name(self, obj):
         full_name = obj.user.get_full_name().strip()
@@ -109,4 +125,3 @@ class UserUpdateSerializer(serializers.Serializer):
             client.save()
 
         return instance
-

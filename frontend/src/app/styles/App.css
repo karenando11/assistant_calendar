@@ -1,5 +1,7 @@
 .app {
   min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
   background-color: #fafaf8;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   padding: 2rem;
@@ -181,4 +183,26 @@
     display: block;
     min-height: calc(100dvh - 180px);
   }
+}
+
+.app__bottom-actions {
+  margin-top: auto;
+  padding-top: 1rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.app__admin-page {
+  border: 1px solid #0f172a;
+  border-radius: 0.65rem;
+  background: #0f172a;
+  color: #ffffff;
+  padding: 0.65rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.app__admin-page:hover {
+  background: #1e293b;
 }

@@ -3,7 +3,7 @@ from django.urls import path
 from django.urls import include
 from rest_framework.routers import DefaultRouter
 from events.views import EventViewSet, CategoryViewSet
-from users.views import ClientViewSet, UserCreateView, UserListView, UserUpdateView
+from users.views import ClientViewSet, CoachViewSet, UserCreateView, UserListView, UserUpdateView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
@@ -11,6 +11,7 @@ router = DefaultRouter()
 router.register(r"event", EventViewSet, basename="event")
 router.register(r"category", CategoryViewSet, basename="category")
 router.register(r"client", ClientViewSet, basename="client")
+router.register(r"coach", CoachViewSet, basename="coach")
 
 urlpatterns = [
     path('admin/', admin.site.urls),

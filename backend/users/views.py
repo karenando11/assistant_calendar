@@ -9,15 +9,17 @@ from rest_framework.views import APIView
 
 from .permissions import IsAdminGroupOrSuperuser, IsAdminOrCoachOrSuperuser
 from .roles import get_user_role
-from .serializers import ClientSerializer, UserCreateSerializer, UserUpdateSerializer
+from .serializers import ClientSerializer, CoachSerializer, UserCreateSerializer, UserUpdateSerializer
 from users.models import Client, Coach
 
 
 def serialize_user(user):
-    client = Client.objects.filter(user=user).first()
+    coach_profile = Coach.objects.filter(user=user).first()
+    client_profile = Client.objects.filter(user=user).first()
+
     coach_name = None
-    if client and client.coach and client.coach.user:
-        coach_name = client.coach.user.get_full_name().strip() or client.coach.user.username
+    if client_profile and client_profile.coach and client_profile.coach.user:
+        coach_name = client_profile.coach.user.get_full_name().strip() or client_profile.coach.user.username
 
     return {
         "id": user.id,
@@ -26,7 +28,8 @@ def serialize_user(user):
         "last_name": user.last_name,
         "email": user.email,
         "role": (get_user_role(user) or "").lower(),
-        "coach_id": client.coach_id if client else None,
+        "coach_profile_id": coach_profile.id if coach_profile else None,
+        "coach_id": client_profile.coach_id if client_profile else None,
         "coach_name": coach_name,
     }
 
@@ -47,6 +50,29 @@ class ClientViewSet(ReadOnlyModelViewSet):
 
         if viewer_role == "client":
             return base_qs.filter(user=self.request.user)
+
+        return base_qs.none()
+
+
+class CoachViewSet(ReadOnlyModelViewSet):
+    serializer_class = CoachSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        base_qs = Coach.objects.select_related("user").all().order_by("id")
+        viewer_role = (get_user_role(self.request.user) or "").lower()
+
+        if viewer_role == "admin":
+            return base_qs
+
+        if viewer_role == "coach":
+            return base_qs.filter(user=self.request.user)
+
+        if viewer_role == "client":
+            client = Client.objects.filter(user=self.request.user).select_related("coach").first()
+            if client and client.coach_id:
+                return base_qs.filter(id=client.coach_id)
+            return base_qs.none()
 
         return base_qs.none()
 
@@ -125,3 +151,18 @@ class UserUpdateView(APIView):
         updated_user = serializer.save()
         return Response(serialize_user(updated_user), status=status.HTTP_200_OK)
 
+    @extend_schema(responses={204: None, 400: dict, 404: dict})
+    def delete(self, request, user_id):
+        user = User.objects.filter(id=user_id).first()
+        if not user:
+            return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        role = (get_user_role(user) or "").lower()
+        if role not in {"coach", "client"}:
+            return Response(
+                {"detail": "Only coach or client users can be deleted from this endpoint."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
