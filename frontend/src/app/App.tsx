@@ -22,9 +22,11 @@ export default function App() {
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [mobileView, setMobileView] = useState<View>('calendar');
   const [eventsState, setEventsState] = useState<CalendarEvent[]>([]);
-  const [authUser, setAuthUser] = useState<string | null>(() =>
-    localStorage.getItem('auth_username')
-  );
+  const [authUser, setAuthUser] = useState<string | null>(() => {
+    const token = localStorage.getItem('access_token');
+    if (!token) return null;
+    return localStorage.getItem('auth_username') || 'User';
+  });
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [sessionExpired, setSessionExpired] = useState(false);
 
@@ -53,7 +55,12 @@ export default function App() {
   useEffect(() => {
     const fetchData = async () => {
       const token = localStorage.getItem('access_token');
-      if (!token) return;
+      if (!token) {
+        setAuthUser(null);
+        setSessionExpired(false);
+        resetAppData();
+        return;
+      }
 
       try {
         const [eventRes, categoryRes, clientRes] = await Promise.all([
@@ -379,3 +386,4 @@ export default function App() {
     </div>
   );
 }
+
